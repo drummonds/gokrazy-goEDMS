@@ -45,7 +45,7 @@ func postgres() error {
 		"-v", "/perm/postgres_docker:/var/lib/postgresql/data:Z",
 		"-p", "5432:5432",
 		"--network", "host",
-		"-e POSTGRES_PASSWORD", os.Getenv("POSTGRES_PASSWORD"),
+		"-e POSTGRES_PASSWORD",
 		"--name", "postgres",
 		"docker.io/library/postgres",
 		"postgres"); err != nil {
