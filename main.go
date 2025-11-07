@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"os/exec"
 	"strings"
@@ -30,12 +30,14 @@ func postgres() error {
 	// container will never have working networking if it starts too early.
 	gokrazy.WaitForClock()
 
+	slog.Info("Stopping existing postgres container if running")
 	if err := podman("kill", "postgres"); err != nil {
-		log.Print(err)
+		slog.Info("Could not kill postgres container (may not be running)", "error", err)
 	}
 
+	slog.Info("Removing existing postgres container if present")
 	if err := podman("rm", "postgres"); err != nil {
-		log.Print(err)
+		slog.Info("Could not remove postgres container (may not exist)", "error", err)
 	}
 
 	// You could podman pull here.
@@ -57,8 +59,10 @@ func postgres() error {
 
 func main() {
 	if err := postgres(); err != nil {
-		log.Fatal(err)
+		slog.Error("Failed to start postgres container", "error", err)
+		os.Exit(1)
 	}
+	slog.Info("Postgres container started successfully")
 }
 
 // expandPath returns env, but with PATH= modified or added
