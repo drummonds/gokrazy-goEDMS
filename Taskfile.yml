@@ -1,0 +1,36 @@
+version: '3'
+
+vars:
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "vx.x.x"
+  BINARY_NAME: gokrazy-goEDMS
+
+tasks:
+  build:
+    desc: Build the binary with embedded git tag version
+    cmds:
+      - go build -ldflags "-X main.version={{.VERSION}}" -o {{.BINARY_NAME}} .
+    sources:
+      - "*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.BINARY_NAME}}"
+
+  clean:
+    desc: Remove built binary
+    cmds:
+      - rm -f {{.BINARY_NAME}}
+
+  run:
+    desc: Build and run the application
+    deps:
+      - build
+    cmds:
+      - ./{{.BINARY_NAME}}
+
+  version:
+    desc: Show the version that would be embedded
+    cmds:
+      - echo "Version: {{.VERSION}}"
+    silent: true
