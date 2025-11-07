@@ -3,6 +3,13 @@
 The aim is to get to a fault tolerant instance so that you can just replace the raspbery pi or SSD WHEN it fails.
 For the moment I am using SSD and hopeful for enough time to make it fault tolerant and to develop the backup systems.
 
+## Environment variables
+
+Name | Default | Options |Description
+---|---
+LOG_LEVEL | info | debug, info, warn, error |Set log level
+POSTGRES_PASSWORD | | | Set the pstgres password for user postgres
+
 
 # Plan of attack
 

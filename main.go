@@ -10,6 +10,10 @@ import (
 	"github.com/gokrazy/gokrazy"
 )
 
+// version is set at build time using -ldflags
+// Example: go build -ldflags "-X main.version=$(git describe --tags --always --dirty)"
+var version = "vx.x.x"
+
 func podman(args ...string) error {
 	podman := exec.Command("/usr/local/bin/podman", args...)
 	podman.Env = expandPath(os.Environ())
@@ -21,6 +25,21 @@ func podman(args ...string) error {
 		return fmt.Errorf("%v: %v", podman.Args, err)
 	}
 	return nil
+}
+
+func getLogLevelFromEnv() slog.Level {
+	levelStr := os.Getenv("LOG_LEVEL")
+
+	switch strings.ToLower(levelStr) {
+	case "debug":
+		return slog.LevelDebug
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
 }
 
 func postgres() error {
@@ -57,7 +76,19 @@ func postgres() error {
 	return nil
 }
 
+func getGitTag() string {
+	return version
+}
+
 func main() {
+	_ = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: getLogLevelFromEnv(),
+	}))
+
+	// Get git tag information
+	gitTag := getGitTag()
+	slog.Info("Application version", "git_tag", gitTag)
+
 	if err := postgres(); err != nil {
 		slog.Error("Failed to start postgres container", "error", err)
 		os.Exit(1)
